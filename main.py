@@ -3,12 +3,17 @@ import scipy.io as sio
 from numpy import *
 
 
-def channel2APDP(frequentiekarateristiek):
-    inv_four = fft.ifft(frequentiekarateristiek)
-    return inv_four
+# def channel2APDP(frq_char):
+#     inv_four = fft.ifft(frq_char)
+#     #power of inverse fourier
+#     sum = 0
+#     for i in range(0,100):
+#       sum += inv_four[i]**2
+#     power = sum/(2*100+1)
+#     return power
 
 
-def calculate_delays():
+def APDP2delays():
     print("delay")
 
 
@@ -18,7 +23,6 @@ def main():
     punt = data[:, :, 1]
     punt = [rij[0] for rij in punt]
     print(punt)
-    print("enterezfndxnvnqsdlnvklnqdflknvklqdfnklvn")
     APDP = channel2APDP(punt[:200])
     print(APDP)
     print("Hello World!")
