@@ -5,7 +5,8 @@ from numpy import *
 
 # def channel2APDP(frq_char):
 #     inv_four = fft.ifft(frq_char)
-#     #power of inverse fourier
+#     #power of inverse fourier (for one point
+#       # ==> needs to be updated for all points)
 #     sum = 0
 #     for i in range(0,100):
 #       sum += inv_four[i]**2
