@@ -3,15 +3,23 @@ import scipy.io as sio
 from numpy import *
 
 
-# def channel2APDP(frq_char):
-#     inv_four = fft.ifft(frq_char)
-#     #power of inverse fourier (for one point
-#       # ==> needs to be updated for all points)
-#     sum = 0
-#     for i in range(0,100):
-#       sum += inv_four[i]**2
-#     power = sum/(2*100+1)
-#     return power
+def channel2APDP(frq_char):
+    inv_four = fft.ifft(frq_char)
+    # power of inverse fourier (for one point
+    # ==> needs to be updated for all points)
+    sum = 0
+    for i in range(0, 100):
+        sum += inv_four[i]**2
+    power = sum/(2*100+1)
+    return power
+
+
+def av_c2APDP(power: list) -> float:
+    av_power = 0
+    for i in range(0, 200):
+        av_power += power[i]
+    av_power /= 200
+    return av_power
 
 
 def APDP2delays():
