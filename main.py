@@ -3,17 +3,17 @@ import scipy.io as sio
 from numpy import *
 
 
-def channel2APDP(frq_char):
+def channel2APDP(frq_char: list) -> float:
     inv_four = fft.ifft(frq_char)
     # power of inverse fourier (for one point
     # ==> needs to be updated for all points)
     sum = 0
-    for i in range(0, 200):
-        sum += inv_four[i]**2
-    power = sum/(2*200+1)
     av_power = 0
-    for i in range(0,100):
-        
+    for j in range(0, 100):
+        for i in range(0, 200):
+            sum += inv_four[i, j]**2
+        av_power += sum/(2*200+1)
+    av_power /= 100
     return av_power
 
 
@@ -24,11 +24,10 @@ def APDP2delays():
 def main():
     dataset_1 = sio.loadmat("Dataset_1.mat")
     data = dataset_1["H"]
-    punt = data[:, :, 1]
-    punt = [rij[0] for rij in punt]
-    print(punt)
-    APDP = channel2APDP(punt[:200])
-    print(APDP)
+    punt = data[:, 0, :]
+    # print(punt)a
+    # APDP = channel2APDP(punt[:200])
+    # print(APDP)
     print("Hello World!")
 
 
