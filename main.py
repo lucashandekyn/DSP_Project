@@ -8,17 +8,10 @@ def channel2APDP(frq_char):
     # power of inverse fourier (for one point
     # ==> needs to be updated for all points)
     sum = 0
-    for i in range(0, 100):
-        sum += inv_four[i]**2
-    power = sum/(2*100+1)
-    return power
-
-
-def av_c2APDP(power: list) -> float:
-    av_power = 0
     for i in range(0, 200):
-        av_power += power[i]
-    av_power /= 200
+        sum += inv_four[i]**2
+    power = sum/(2*200+1)
+    av_power = 0
     return av_power
 
 
