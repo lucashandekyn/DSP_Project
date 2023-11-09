@@ -12,6 +12,8 @@ def channel2APDP(frq_char):
         sum += inv_four[i]**2
     power = sum/(2*200+1)
     av_power = 0
+    for i in range(0,100):
+        
     return av_power
 
 
