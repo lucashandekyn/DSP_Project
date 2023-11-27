@@ -3,17 +3,16 @@ import scipy.io as sio
 from numpy import *
 
 
-def channel2APDP(frq_char: list) -> float:
+def channel2APDP(frq_char: list) -> list:
     inv_four = fft.ifft(frq_char)
     # power of inverse fourier (for one point
     # ==> needs to be updated for all points)
     sum = 0
-    av_power = 0
+    av_power = []
     for j in range(0, 100):
         for i in range(0, 200):
             sum += inv_four[i, j]**2
-        av_power += sum/(2*200+1)
-    av_power /= 100
+        av_power.append(sum/(2*200+1))
     return av_power
 
 
