@@ -1,19 +1,33 @@
 from math import *
 import scipy.io as sio
 from numpy import *
+from numpy.fft import *
+import matplotlib.pyplot as plt
+
+# Data in vorm van:
+# voor transpose => freqtonen (200) | positie(25) | metingen(100)
+# na transpose => positie(25) | metingen(100) | freqtonen (200)
 
 
 def channel2APDP(frq_char: list) -> list:
-    inv_four = fft.ifft(frq_char)
-    # power of inverse fourier (for one point
-    # ==> needs to be updated for all points)
-    sum = 0
+    data = transpose(frq_char, (1, 2, 0))
+    for i in range(0, 100):
+        data[:, i] = ifft(data[:, i])
+    # power of inverse fourier
+    for i in range(0, 100):
+        data[:, i] = abs(data[:, i]) ** 2
+    # average power delay profile
     av_power = []
-    for j in range(0, 100):
-        for i in range(0, 200):
-            sum += inv_four[i, j]**2
-        av_power.append(sum/(2*200+1))
+    for i in range(0, 100):
+        av_power.append(mean(data[:, i]))
     return av_power
+
+
+def plot_APDP(APDP: list):
+    plt.plot(APDP)
+    plt.xlabel("delay")
+    plt.ylabel("power")
+    plt.show()
 
 
 def APDP2delays():
@@ -23,11 +37,9 @@ def APDP2delays():
 def main():
     dataset_1 = sio.loadmat("Dataset_1.mat")
     data = dataset_1["H"]
-    punt = data[:, 0, :]
-    # print(punt)a
-    # APDP = channel2APDP(punt[:200])
-    # print(APDP)
-    print("Hello World!")
+    APDP = channel2APDP(data)
+    print(APDP)
+    plot_APDP(APDP)
 
 
 if __name__ == "__main__":
