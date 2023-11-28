@@ -11,15 +11,15 @@ import matplotlib.pyplot as plt
 
 def channel2APDP(frq_char: list) -> list:
     data = transpose(frq_char, (1, 2, 0))
-    for i in range(0, 100):
-        data[:, i] = ifft(data[:, i])
+    data = reshape(data, (25, 100, 200))
+    for j in range(25):
+        for i in range(100):
+            data[j][i] = ifft(data[j][i])
     # power of inverse fourier
-    for i in range(0, 100):
-        data[:, i] = abs(data[:, i]) ** 2
+    # for i in range(0, 100):
+    #     data[:, i] = abs(data[:, i]) ** 2
     # average power delay profile
     av_power = []
-    for i in range(0, 100):
-        av_power.append(mean(data[:, i]))
     return av_power
 
 
@@ -36,8 +36,7 @@ def APDP2delays():
 
 def main():
     dataset_1 = sio.loadmat("Dataset_1.mat")
-    data = dataset_1["H"]
-    APDP = channel2APDP(data)
+    APDP = channel2APDP(dataset_1["H"])
     print(APDP)
     plot_APDP(APDP)
 
