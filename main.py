@@ -9,22 +9,20 @@ from scipy import fftpack
 # na transpose => positie(25) | metingen(100) | freqtonen (200)
 
 
-def channel2APDP(dataset: list, pos: int) -> list:
+def channel2APDP(dataset: list, pos: int) -> float:
     dataset = np.transpose(dataset, (1, 2, 0))
     dataset = np.reshape(dataset, (25, 100, 200))
     APDP = 0
-    freqkar = dataset[pos-1][0][:]
+    freqkar = dataset[pos][0][:]
     impulsrespons = fftpack.ifft(freqkar)
     plt.plot(impulsrespons)
     plt.show()
-
     for i in range(100):
-        freqkar = dataset[pos-1][i][:]
+        freqkar = dataset[pos][i][:]
         impulsrespons = np.real(fftpack.ifft(freqkar))
-        # vermogen = sum(abs(x)**2 for x in impulsrespons) / len(impulsrespons)
-        APDP += impulsrespons
+        vermogen = sum(abs(x)**2 for x in impulsrespons) / len(impulsrespons)
+        APDP += vermogen
     APDP = APDP / 100
-
     print(APDP)
     return APDP
 
@@ -36,13 +34,14 @@ def plot_APDP(APDP: list):
     plt.show()
 
 
-def APDP2delays(apdp):
+# geeft 2 grootste maxima uit de APDPs
+def APDP2delays(apdps: list) -> list:
     lokale_maxima_index = [i for i in range(
-        1, len(apdp)-1) if apdp[i] > apdp[i-1] and apdp[i] > apdp[i+1]]
+        1, len(apdps)-1) if apdps[i] > apdps[i-1] and apdps[i] > apdps[i+1]]
 
     # Sorteer de lokale maxima op basis van het vermogen in aflopende volgorde
     gesorteerde_maxima = sorted(
-        lokale_maxima_index, key=lambda i: apdp[i], reverse=True)
+        lokale_maxima_index, key=lambda i: apdps[i], reverse=True)
 
     # Selecteer de twee grootste lokale maxima (als ze bestaan)
     grootste_maxima = gesorteerde_maxima[:2] if len(
@@ -51,8 +50,13 @@ def APDP2delays(apdp):
     return grootste_maxima
 
 
-def calculate_delays(dataset):
-    apdp = channel2APDP(dataset, 1)
+def calculate_delays(dataset) -> list:
+    apdp = []
+    maxi = []
+    for i in range(25):
+        apdp.append(channel2APDP(dataset, i))
+        maxi.append(APDP2delays(apdp[i]))
+    return maxi
 
 
 def calculate_location():
@@ -63,15 +67,9 @@ def calculate_location():
 def main():
     dataset_1 = sio.loadmat("Dataset_1.mat")
     dataset_1 = dataset_1["H"]
-    # print(dataset_1)
-    apdp = channel2APDP(dataset_1, 1)
-    maxi = APDP2delays(apdp)
-    apdp = channel2APDP(dataset_1, 10)
-    maxi = APDP2delays(apdp)
-    apdp = channel2APDP(dataset_1, 25)
-    maxi = APDP2delays(apdp)
-    # print(APDP)
-    # plot_APDP(APDP)
+
+    delays = calculate_delays(dataset_1)
+    print(delays)
 
     ## Het echte traject in een plot ##
     t = np.linspace(0, 25, 100)
@@ -85,5 +83,4 @@ def main():
     plt.show()
 
 
-if __name__ == "__main__":
-    main()
+main()
