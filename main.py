@@ -11,31 +11,33 @@ from scipy import fftpack
 
 def channel2APDP(dataset: list, pos: int) -> list:
     dataset = np.transpose(dataset, (1, 2, 0))
-    APDP = 0
+    dataset = np.reshape(dataset, (25, 100, 200))
+
+    apdp = 0
+
+    """     fs=1e9
     freqkar = dataset[pos-1][0][:]
     impulsrespons = fftpack.ifft(freqkar)
-    plt.plot(impulsrespons)
-    plt.show()
+    pdp = np.abs(impulsrespons)**2
+    tijdstappen = np.arange(0, len(pdp)) / fs
+
+    #plt.plot(impulsrespons)
+    plt.plot(tijdstappen, pdp)
+    plt.show() """
 
 
     for i in range(100):
         freqkar = dataset[pos-1][i][:]
-        impulsrespons = np.real(fftpack.ifft(freqkar))
+        impulsrespons = fftpack.ifft(freqkar)
+        pdp = np.abs(impulsrespons)**2
         #vermogen = sum(abs(x)**2 for x in impulsrespons) / len(impulsrespons)
-        APDP += impulsrespons
-    APDP = APDP / 100
+        apdp += pdp
+    apdp = apdp / 100
 
 
 
-    print(APDP)
-    return APDP
-
-
-def plot_APDP(APDP: list):
-    plt.plot(APDP)
-    plt.xlabel("delay")
-    plt.ylabel("power")
-    plt.show()
+    #print(apdp)
+    return apdp
 
 
 def APDP2delays(apdp):
@@ -46,14 +48,20 @@ def APDP2delays(apdp):
 
     # Selecteer de twee grootste lokale maxima (als ze bestaan)
     grootste_maxima = gesorteerde_maxima[:2] if len(gesorteerde_maxima) >= 2 else gesorteerde_maxima
+    # Zet getal om naar delay
+    grootste_maxima = [1/(1e9 + x * 10e6) for x in grootste_maxima]
     print(grootste_maxima)
     return grootste_maxima
 
 
-def calculate_delays(dataset):
-    apdp = channel2APDP(dataset, 1)
+def calculate_delays(dataset: list) -> list: 
+    maxi = []
+    for i in range(len(dataset[0][:][:])):
+        maxi.append(APDP2delays(channel2APDP(dataset, i+1)))
+    print(len(maxi))
+    return maxi
 
-def calculate_location():
+def calculate_location(delay_list: list):
 
     pass
 
@@ -61,13 +69,8 @@ def calculate_location():
 def main():
     dataset_1 = sio.loadmat("Dataset_1.mat")
     dataset_1 = dataset_1["H"]
-    #print(dataset_1)
-    apdp = channel2APDP(dataset_1, 1)
-    maxi = APDP2delays(apdp)
-    apdp = channel2APDP(dataset_1, 10)
-    maxi = APDP2delays(apdp)
-    apdp = channel2APDP(dataset_1, 25)
-    maxi = APDP2delays(apdp)
+    calculate_delays(dataset_1)
+
     #print(APDP)
     #plot_APDP(APDP)
     
