@@ -18,11 +18,11 @@ def channel2APDP(dataset: list, pos: int) -> float:
     plt.plot(impulsrespons)
     plt.show()
     for i in range(100):
-        freqkar = dataset[pos][i][:]
-        impulsrespons = np.real(fftpack.ifft(freqkar))
-        vermogen = sum(abs(x)**2 for x in impulsrespons) / len(impulsrespons)
-        APDP += vermogen
-    APDP = APDP / 100
+        for j in range(200):
+            freqkar = dataset[pos][i][:]
+            vermogen = (abs(fftpack.ifft(freqkar)))**2
+            APDP += vermogen
+    APDP = APDP / 200
     print(APDP)
     return APDP
 
