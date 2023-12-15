@@ -14,12 +14,11 @@ def channel2APDP(dataset: list, pos: int) -> list:
     dataset = np.transpose(dataset, (1, 2, 0))
     dataset = np.reshape(dataset, (25, 100, 200))
     PDP = []
-    for i in range(len(dataset[pos])-1):
+    for i in range(len(dataset[pos])):
         freqkar = dataset[pos][i][:]
         vermogen = (abs(fftpack.ifft(freqkar)))**2
         PDP.append(vermogen)
     APDP = np.mean(PDP, axis=0)
-    print("APDP: ", APDP)
     return APDP
 
 
@@ -69,8 +68,14 @@ def calculate_location(delays: list) -> list:
         t1 = delay[1]
         r0 = t0 * const.c
         r1 = t1 * const.c
-        x = 0  # todo
-        y = 0  # todo
+        print(r0, r1)
+        # calculate the angle using the law of cosines
+        cos_theta = (r0**2 + r1**2 - 2**2) / (2 * r0 * r1)
+        cos_theta = np.clip(cos_theta, -1, 1)
+        theta = np.arccos(cos_theta)
+        # calculate the x and y coordinates of the drone
+        x = r0 * np.cos(theta)
+        y = r0 * np.sin(theta)
         locations.append([x, y])
     return locations
 
