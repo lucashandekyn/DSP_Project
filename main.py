@@ -1,5 +1,6 @@
 from math import *
 import scipy.io as sio
+import scipy.constants as const
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import fftpack
@@ -9,67 +10,78 @@ from scipy import fftpack
 # na transpose => positie(25) | metingen(100) | freqtonen (200)
 
 
-def channel2APDP(dataset: list, pos: int) -> float:
+def channel2APDP(dataset: list, pos: int) -> list:
     dataset = np.transpose(dataset, (1, 2, 0))
     dataset = np.reshape(dataset, (25, 100, 200))
-    APDP = 0
-    freqkar = dataset[pos][0][:]
-    impulsrespons = fftpack.ifft(freqkar)
-    plt.plot(impulsrespons)
-    plt.show()
-    for i in range(100):
-        for j in range(200):
-            freqkar = dataset[pos][i][:]
-            vermogen = (abs(fftpack.ifft(freqkar)))**2
-            APDP += vermogen
-    APDP = APDP / 200
-    print(APDP)
+    PDP = []
+    for i in range(len(dataset[pos])-1):
+        freqkar = dataset[pos][i][:]
+        vermogen = (abs(fftpack.ifft(freqkar)))**2
+        PDP.append(vermogen)
+    APDP = np.mean(PDP, axis=0)
+    print("APDP: ", APDP)
     return APDP
 
 
-def plot_APDP(APDP: list):
-    plt.plot(APDP)
-    plt.xlabel("delay")
-    plt.ylabel("power")
-    plt.show()
+# def plot_APDP(APDP: list):
+#     plt.plot(APDP)
+#     plt.xlabel("delay")
+#     plt.ylabel("power")
+#     plt.show()
 
 
-# geeft 2 grootste maxima uit de APDPs
-def APDP2delays(apdps: list) -> list:
+# geeft 2 grootste maxima uit de APDP
+def APDP2delays(apdp):
     lokale_maxima_index = [i for i in range(
-        1, len(apdps)-1) if apdps[i] > apdps[i-1] and apdps[i] > apdps[i+1]]
+        1, len(apdp)-1) if apdp[i] > apdp[i-1] and apdp[i] > apdp[i+1]]
 
     # Sorteer de lokale maxima op basis van het vermogen in aflopende volgorde
     gesorteerde_maxima = sorted(
-        lokale_maxima_index, key=lambda i: apdps[i], reverse=True)
+        lokale_maxima_index, key=lambda i: apdp[i], reverse=True)
 
     # Selecteer de twee grootste lokale maxima (als ze bestaan)
     grootste_maxima = gesorteerde_maxima[:2] if len(
         gesorteerde_maxima) >= 2 else gesorteerde_maxima
-    print(grootste_maxima)
+    # Zet getal om naar delay
+    grootste_maxima = [1/(1e9 + x * 10e6) for x in grootste_maxima]
     return grootste_maxima
 
 
-def calculate_delays(dataset) -> list:
-    apdp = []
+def calculate_delays(dataset: list) -> list:
     maxi = []
-    for i in range(25):
-        apdp.append(channel2APDP(dataset, i))
-        maxi.append(APDP2delays(apdp[i]))
+    for i in range(len(dataset[0][:][:])):
+        maxi.append(APDP2delays(channel2APDP(dataset, i)))
     return maxi
 
 
-def calculate_location():
-
-    pass
+def calculate_location(delays: list) -> list:
+    # t0: tau 0 ==> rijstijd direct pad
+    # t1: tau 1 ==> rijstijd gereflecteerd pad
+    # [xb0,yb0] = [0,1] (coordinaten basisstation)
+    # gereflecteerd: [xb1,yb1] = [0,-1]
+    # ==> hetzelfde pad als je alles zou optellen met reflectie
+    # afstand == tijd * snelheid
+    y0 = 1
+    y1 = -1
+    locations = []
+    for delay in delays:
+        t0 = delay[0]
+        t1 = delay[1]
+        r0 = t0 * const.c
+        r1 = t1 * const.c
+        x = 0  # todo
+        y = 0  # todo
+        locations.append([x, y])
+    return locations
 
 
 def main():
     dataset_1 = sio.loadmat("Dataset_1.mat")
     dataset_1 = dataset_1["H"]
-
+    channel2APDP(dataset_1, 0)
     delays = calculate_delays(dataset_1)
-    print(delays)
+    locations = calculate_location(delays)
+    print(locations)
 
     ## Het echte traject in een plot ##
     t = np.linspace(0, 25, 100)
