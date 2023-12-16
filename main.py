@@ -41,9 +41,27 @@ def APDP2delays(apdp):
     # Selecteer de twee grootste lokale maxima (als ze bestaan)
     grootste_maxima = gesorteerde_maxima[:2] if len(
         gesorteerde_maxima) >= 2 else gesorteerde_maxima
+
     # Zet getal om naar delay
-    grootste_maxima = [1/(1e9 + x * 10e6) for x in grootste_maxima]
+    time_step = 5e-10  # time step
+    grootste_maxima = [x * time_step for x in grootste_maxima]
     return grootste_maxima
+
+
+# def APDP2delays(apdp):
+#     lokale_maxima_index = [i for i in range(
+#         1, len(apdp)-1) if apdp[i] > apdp[i-1] and apdp[i] > apdp[i+1]]
+
+#     # Sorteer de lokale maxima op basis van het vermogen in aflopende volgorde
+#     gesorteerde_maxima = sorted(
+#         lokale_maxima_index, key=lambda i: apdp[i], reverse=True)
+
+#     # Selecteer de twee grootste lokale maxima (als ze bestaan)
+#     grootste_maxima = gesorteerde_maxima[:2] if len(
+#         gesorteerde_maxima) >= 2 else gesorteerde_maxima
+#     # Zet getal om naar delay
+#     grootste_maxima = [1/(1e9 + x * 10e6) for x in grootste_maxima]
+#     return grootste_maxima
 
 
 def calculate_delays(dataset: list) -> list:
@@ -68,7 +86,6 @@ def calculate_location(delays: list) -> list:
         t1 = delay[1]
         r0 = t0 * const.c
         r1 = t1 * const.c
-        print(r0, r1)
         # calculate the angle using the law of cosines
         cos_theta = (r0**2 + r1**2 - 2**2) / (2 * r0 * r1)
         cos_theta = np.clip(cos_theta, -1, 1)
@@ -86,8 +103,11 @@ def main():
     channel2APDP(dataset_1, 0)
     delays = calculate_delays(dataset_1)
     locations = calculate_location(delays)
-    print(locations)
-
+    # plot locations
+    x = [x[0] for x in locations]  # x-coordinates
+    y = [x[1] for x in locations]  # y-coordinates
+    plt.scatter(x, y, label='locaties')
+    plt.show()
     ## Het echte traject in een plot ##
     t = np.linspace(0, 25, 100)
     x = 2 + t/2
