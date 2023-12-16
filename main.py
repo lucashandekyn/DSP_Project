@@ -86,13 +86,7 @@ def calculate_location(delays: list) -> list:
         t1 = delay[1]
         r0 = t0 * const.c
         r1 = t1 * const.c
-        # calculate the angle using the law of cosines
-        cos_theta = (r0**2 + r1**2 - 2**2) / (2 * r0 * r1)
-        cos_theta = np.clip(cos_theta, -1, 1)
-        theta = np.arccos(cos_theta)
         # calculate the x and y coordinates of the drone
-        x = r0 * np.cos(theta)
-        y = r0 * np.sin(theta)
         locations.append([x, y])
     return locations
 
