@@ -56,7 +56,7 @@ def APDP2delays(vermogen: list, dT: float) -> list:
     return twee_grootste_pieken
 
 
-def calculate_delays(dataset: list, fs: int, window: bool) -> list:
+def calculate_delays(dataset: list, fs: float, window: bool) -> list:
     delays = []
     N = len(dataset[:][:][:])       # Aantal sampels in de dataset
     dT = 1/(N * fs)                 # Afstand tussen 2 tijdssamples
