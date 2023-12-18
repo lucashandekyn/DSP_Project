@@ -56,7 +56,7 @@ def APDP2delays(vermogen: list, dT: float) -> list:
     return twee_grootste_pieken
 
 
-def calculate_delays(dataset: list, fs: float, window: bool) -> list:
+def calculate_delays(dataset: list, fs: int, window: bool) -> list:
     delays = []
     N = len(dataset[:][:][:])       # Aantal sampels in de dataset
     dT = 1/(N * fs)                 # Afstand tussen 2 tijdssamples
@@ -75,10 +75,7 @@ def calculate_location(delays: list):
     # gereflecteerd: [xb1,yb1] = [0,-1]
     # ==> hetzelfde pad als je alles zou optellen met reflectie
     # afstand == tijd * snelheid
-    y0 = 1
-    y1 = -1
-    d = 2       # Afstand tussen de 2 middelpunten
-    locations = []
+
     locationsx = []
     locationsy = []
 
@@ -89,15 +86,13 @@ def calculate_location(delays: list):
         r0 = t0 * const.c
         r1 = t1 * const.c
 
-        # We nemen 2 cirkels met als middelpunten het basistation het het greflecteerde basistation
+        # We nemen 2 cirkels met als middelpunten het basistation en het greflecteerde basistation
         # De gezochte locatie is waar deze 2 cirkel elkaar snijden (in het rechtse vlak)
-        a = (r0**2 - r1**2 + d**2) / (2 * d)
-        if r0 > abs(a):
-            # print(r0, r1, a)
-            h = sqrt(r0**2 - a**2)
-            x = h*(y0 - y1) / d  # x0 + a*(x1 - x0) / d + h*(y1 - y0) / d
-            y = y0 + a*(y1 - y0) / d  # y0 + a*(y1 - y0) / d - h*(x1 - x0) / d
-            locations.append([x, y])
+        a = -r0**4 + 2*r0**2*r1**2 + 8*r0**2 - r1**4 + 8*r1**2 - 16
+        print(r0, r1)
+        if a >= 0:
+            x = 1/4 * sqrt(a)
+            y = (r1**2-r0**2)/4
             locationsx.append(x)
             locationsy.append(y)
         else:
